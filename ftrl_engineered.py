@@ -45,7 +45,7 @@ class ftrl(object):
 	except:
 	    pass
 
-	del line['HistCTR']
+	#del line['HistCTR']
 	self.X = [0.] * len(line)
 	
         for i, key in enumerate(line):
@@ -96,16 +96,9 @@ class ftrl(object):
     def joinTable(self, tableA):
         
         query_command = '''select * from 
-        (select * from ''' + tableA + \
+        ''' + tableA + \
         '''
         where ObjectType = 3
-        ) X
-        inner join AdsInfo Y
-        on X.AdID = Y.AdID
-        inner join SearchInfo Z1
-        on X.SearchID = Z1.SearchID
-        inner join UserInfo Z2
-        on Z1.UserID = Z2.UserID
         '''
 
         print query_command
@@ -127,7 +120,7 @@ if __name__ == '__main__':
             beta = 1., 
             l1 = 0.4,
             l2 = 1.0, 
-	    bits = 20)
+	    bits = 28)
 
     loss = 0.
     count = 0
@@ -136,7 +129,7 @@ if __name__ == '__main__':
     cursor = conn.cursor()
         
     print 'Joining table:'
-    train = 'trainSearchStream'
+    train = 'BigData5train'
     #query = 'select * from ' + train #+ ' limit 10'
     query = clf.joinTable(train)
     
@@ -168,7 +161,7 @@ if __name__ == '__main__':
 	clf.update(pred)
 	count += 1
         
-        if count%100000 == 0: 
+        if count%1000000 == 0: 
 	    print ("(seen, loss) : ", (count, loss * 1./count))
 	
         #if count == 100000: 
@@ -177,7 +170,7 @@ if __name__ == '__main__':
     print 'Model training takes ', datetime.datetime.now() - start
 
     print 'Export testing results:'
-    test = 'testSearchStream'
+    test = 'BigData5test'
     #query = 'select * from ' + test #+ ' limit 10'
     query = clf.joinTable(test)
     cursor.execute(query)
