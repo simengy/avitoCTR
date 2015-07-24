@@ -49,14 +49,73 @@ class ftrl(object):
 	self.X = [0.] * len(line)
 	
         for i, key in enumerate(line):
-                #print 'Debug XXXX', key, line[key]
-                try:
-                    val = str(line[key])
-                except UnicodeEncodeError:
-                    val = str(line[key].encode('utf8'))
-		
-                self.X[i] = (abs(hash(key + '_' + val)) % self.bits)
-	self.X = [0] + self.X
+            #print 'Debug XXXX', key, line[key]
+            try:
+                val = str(line[key])
+            except UnicodeEncodeError:
+                val = str(line[key].encode('utf8'))
+
+            if key == 'SearchDate' and False:
+                self.X[i] = val[5:7]
+                self.X.append(abs(hash(key + '_' + val[8:10])) % self.bits )
+                self.X.append(abs(hash(key + '_' + val[11:13])) % self.bits )
+                self.X.append(abs(hash(key + '_' + val[14:16])) % self.bits )
+            
+            self.X[i] = abs(hash(key + '_' + val)) % self.bits
+	
+        self.X = [0] + self.X
+
+        # interaction
+        interaction = True
+
+        if interaction:
+
+            interactions = str(line['SearchRegionID']) + '_x1_' + str(line['SearchCityID']) + '_x1_' + str(line['SearchLocationLevel'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+            
+            interactions = str(line['AdRegionID']) + '_x2_' + str(line['AdCityID']) + '_x2_' + str(line['AdLocationLevel'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+
+            interactions = str(line['SearchParentCategoryID']) + '_x3_' + str(line['SearchSubcategoryID']) + '_x3_' + str(line['SearchCategoryLevel'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+            
+            interactions = str(line['AdParentCategoryID']) + '_x4_' + str(line['AdSubcategoryID']) + '_x4_' + str(line['AdCategoryLevel'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+                        
+            interactions = str(line['UserAgentID']) + '_x5_' + str(line['UserAgentOSID']) + '_x5_' + str(line['UserAgentFamilyID'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+
+            interactions = str(line['UserID']) + '_x6_' + str(line['UserDeviceID']) + '_x6_' + str(line['UserAgentFamilyID'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+            
+            interactions = str(line['UserAgentID']) + '_x7_' + str(line['IPID'])
+            index = abs(hash( interactions )  ) % self.bits
+            self.X.append(index)
+            
+            
+            # pair-wise
+            interCol = []
+            L = len(interCol)
+
+            for i in xrange(L):
+                for j in xrange(i+1, L):
+                    interactions = str(line[interCol[i]]) + '_x_' + str(line[InterCol[j]])
+                    index = abs(hash( interactions )  ) % self.bits
+                    self.X.append(index)
+            
+            # time series -- SearchDate
+            user_id = {}
+            ad_id = {}
+
+
+
+
 
     def logloss(self):
         
@@ -99,6 +158,7 @@ class ftrl(object):
         ''' + tableA + \
         '''
         where ObjectType = 3
+        limit 2000000
         '''
 
         print query_command
@@ -120,7 +180,7 @@ if __name__ == '__main__':
             beta = 1., 
             l1 = 0.8,
             l2 = 1.0, 
-	    bits = 2 ** 30)
+	    bits = 2 ** 24)
 
     loss = 0.
     count = 0
@@ -139,7 +199,7 @@ if __name__ == '__main__':
     names = [description[0] for description in cursor.description ]
     print names
     line = {}
-    epoch = 3
+    epoch = 1
 
     for name in names:
         line[name] = 0
@@ -167,7 +227,7 @@ if __name__ == '__main__':
 	clf.update(pred)
 	count += 1
         
-        if count%1000000 == 0: 
+        if count%100000 == 0: 
 	    print ("(seen, loss) : ", (count, loss * 1./count))
 	
         #if count == 100000: 
