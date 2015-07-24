@@ -116,11 +116,11 @@ if __name__ == '__main__':
 	
         
     database = '../data/database.sqlite'
-    clf = ftrl(alpha = 0.1, 
+    clf = ftrl(alpha = 0.09, 
             beta = 1., 
-            l1 = 0.4,
+            l1 = 0.8,
             l2 = 1.0, 
-	    bits = 28)
+	    bits = 2 ** 30)
 
     loss = 0.
     count = 0
@@ -139,17 +139,23 @@ if __name__ == '__main__':
     names = [description[0] for description in cursor.description ]
     print names
     line = {}
-    
+    epoch = 3
+
     for name in names:
         line[name] = 0
 
     print 'Training FTRL model:'
-    while 1:
-            
+    while epoch > 0:
+
         values = cursor.fetchone()
             
         if values is None:
-            break
+            print 'epoch = ', epoch    
+            epoch -= 1
+            cursor.execute(query)
+            continue
+            #break
+
         for ind in xrange(len(names)):
             line[names[ind]] = values[ind]
 
@@ -183,7 +189,7 @@ if __name__ == '__main__':
         line[name] = 0
 
 
-    with open('temp/temp_2.csv', 'w') as output:
+    with open('temp/temp_3.csv', 'w') as output:
             
         while 1:
             

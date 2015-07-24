@@ -127,7 +127,7 @@ if __name__ == '__main__':
             beta = 1., 
             l1 = 0.4,
             l2 = 1.0, 
-	    bits = 20)
+	    bits = 2 ** 28)
 
     loss = 0.
     count = 0
