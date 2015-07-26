@@ -100,7 +100,7 @@ class ftrl(object):
             
             
             # pair-wise
-        pairwise = False
+        pairwise = True
 
         if pairwise:
             interCol1 = ['SearchLocationID', 'SearchLocationLevel', 'SearchRegionID', 'SearchCityID']
