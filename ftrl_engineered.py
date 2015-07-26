@@ -70,50 +70,57 @@ class ftrl(object):
 
         if interaction:
 
-            interactions = str(line['SearchRegionID']) + '_x1_' + str(line['SearchCityID']) + '_x1_' + str(line['SearchLocationLevel'])
+            interactions = str(line['SearchRegionID']) + '_x_' + str(line['SearchCityID']) + '_x_' + str(line['SearchLocationLevel'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
             
-            interactions = str(line['AdRegionID']) + '_x2_' + str(line['AdCityID']) + '_x2_' + str(line['AdLocationLevel'])
+            interactions = str(line['AdRegionID']) + '_x_' + str(line['AdCityID']) + '_x_' + str(line['AdLocationLevel'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
 
-            interactions = str(line['SearchParentCategoryID']) + '_x3_' + str(line['SearchSubcategoryID']) + '_x3_' + str(line['SearchCategoryLevel'])
+            interactions = str(line['SearchParentCategoryID']) + '_x_' + str(line['SearchSubcategoryID']) + '_x_' + str(line['SearchCategoryLevel'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
             
-            interactions = str(line['AdParentCategoryID']) + '_x4_' + str(line['AdSubcategoryID']) + '_x4_' + str(line['AdCategoryLevel'])
+            interactions = str(line['AdParentCategoryID']) + '_x_' + str(line['AdSubcategoryID']) + '_x_' + str(line['AdCategoryLevel'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
                         
-            interactions = str(line['UserAgentID']) + '_x5_' + str(line['UserAgentOSID']) + '_x5_' + str(line['UserAgentFamilyID'])
+            interactions = str(line['UserAgentID']) + '_x_' + str(line['UserAgentOSID']) + '_x_' + str(line['UserAgentFamilyID'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
 
-            interactions = str(line['UserID']) + '_x6_' + str(line['UserDeviceID']) + '_x6_' + str(line['UserAgentFamilyID'])
+            interactions = str(line['UserID']) + '_x_' + str(line['UserDeviceID']) + '_x_' + str(line['UserAgentFamilyID'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
             
-            interactions = str(line['UserAgentID']) + '_x7_' + str(line['IPID'])
+            interactions = str(line['UserAgentID']) + '_x_' + str(line['IPID'])
             index = abs(hash( interactions )  ) % self.bits
             self.X.append(index)
             
             
             # pair-wise
-            interCol = []
-            L = len(interCol)
+        pairwise = True
 
-            for i in xrange(L):
-                for j in xrange(i+1, L):
-                    interactions = str(line[interCol[i]]) + '_x_' + str(line[InterCol[j]])
+        if pairwise:
+            interCol1 = ['SearchLocationID', 'SearchLocationLevel', 'SearchRegionID', 'SearchCityID']
+            interCol2 = ['AdLocationID', 'AdLocationLevel', 'AdRegionID', 'AdCityID']
+            L1 = len(interCol1)
+            L2 = len(interCol2)
+
+            for i in xrange(L1):
+                for j in xrange(L2):
+                   
+                    if interCol1[i] == interCol2[j]:
+                        continue
+
+                    interactions = str(line[interCol1[i]]) + '_x_' + str(line[interCol2[j]])
                     index = abs(hash( interactions )  ) % self.bits
                     self.X.append(index)
             
             # time series -- SearchDate
             user_id = {}
             ad_id = {}
-
-
 
 
 
