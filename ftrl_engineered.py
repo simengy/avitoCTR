@@ -100,11 +100,15 @@ class ftrl(object):
             
             
             # pair-wise
-        pairwise = False
+        pairwise = True
 
         if pairwise:
-            interCol1 = ['SearchLocationID', 'SearchLocationLevel', 'SearchRegionID', 'SearchCityID']
-            interCol2 = ['AdLocationID', 'AdLocationLevel', 'AdRegionID', 'AdCityID']
+            #interCol1 = ['SearchLocationID', 'SearchLocationLevel', 'SearchRegionID', 'SearchCityID']
+            #interCol2 = ['AdLocationID', 'AdLocationLevel', 'AdRegionID', 'AdCityID']
+            interCol1 = ['Price', 'SearchDate', 'HistCTR', 'Position']
+            interCol2 = ['SearchLocationLevel', 'SearchRegionID', 'SearchCityID', 
+                    'SearchCategoryLevel', 'SearchParentCategoryID', 'SearchSubcategoryID']
+            
             L1 = len(interCol1)
             L2 = len(interCol2)
 
@@ -182,11 +186,11 @@ if __name__ == '__main__':
 	
         
     database = '../data/database.sqlite'
-    clf = ftrl(alpha = 0.1, 
-            beta = 0.5, 
-            l1 = 1.2,
+    clf = ftrl(alpha = 0.10, 
+            beta = 1.5, 
+            l1 = 0.5,
             l2 = 1.0, 
-	    bits = 2 ** 29)
+	    bits = 2 ** 28)
 
     loss = 0.
     count = 0
@@ -233,7 +237,7 @@ if __name__ == '__main__':
 	clf.update(pred)
 	count += 1
         
-        if count%1000000 == 0: 
+        if count%100000 == 0: 
 	    print ("(seen, loss) : ", (count, loss * 1./count))
 	
         #if count == 100000: 
@@ -256,7 +260,7 @@ if __name__ == '__main__':
         line[name] = 0
 
 
-    with open('temp/temp_3.csv', 'w') as output:
+    with open('temp/temp_4.csv', 'w') as output:
             
         while 1:
             

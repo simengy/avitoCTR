@@ -105,6 +105,26 @@ class ftrl(object):
         if pairwise:
             interCol1 = ['SearchLocationID', 'SearchLocationLevel', 'SearchRegionID', 'SearchCityID']
             interCol2 = ['AdLocationID', 'AdLocationLevel', 'AdRegionID', 'AdCityID']
+            
+            interCol1 = ['SearchLocationID', 'SearchLocationLevel', 'SearchRegionID', 'SearchCityID']
+            interCol2 = ['UserAgentID', 'UserAgentOSID', 'UserDeviceID', 'UserAgentFamilyID']
+            
+            interCol1 = ['AdLocationLevel', 'AdRegionID', 'AdCityID']
+            interCol2 = ['UserAgentID', 'UserAgentOSID', 'UserDeviceID', 'UserAgentFamilyID']
+            
+            interCol1 = ['AdCategoryLevel', 'AdParentCategoryID', 'AdSubcategoryID']
+            interCol2 = ['UserAgentID', 'UserAgentOSID', 'UserDeviceID', 'UserAgentFamilyID']
+            
+            #interCol1 = ['AdLocationLevel', 'AdRegionID', 'AdCityID']
+            #interCol2 = ['AdCategoryLevel', 'AdParentCategoryID', 'AdSubcategoryID']
+            
+            interCol1 = ['Price', 'SearchDate', 'HistCTR', 'Position']
+            #interCol2 = ['AdCategoryLevel', 'AdParentCategoryID', 'AdSubcategoryID']
+            #interCol2 = ['UserAgent'SearchLocationLevel', ID', 'UserAgentOSID', 'UserDeviceID', 'UserAgentFamilyID']
+            #interCol2 = ['AdLocationLevel', 'AdRegionID', 'AdCityID']
+            interCol2 = ['AdLocationLevel', 'SearchRegionID', 'SearchCityID', 
+                    'SearchCategoryLevel', 'SearchParentCategoryID', 'SearchSubcategoryID']
+            
             L1 = len(interCol1)
             L2 = len(interCol2)
 
@@ -165,6 +185,7 @@ class ftrl(object):
         ''' + tableA + \
         '''
         where ObjectType = 3
+        limit 2000000
         '''
 
         print query_command
@@ -183,13 +204,14 @@ if __name__ == '__main__':
         
     database = '../data/database.sqlite'
     clf = ftrl(alpha = 0.1, 
-            beta = 0.5, 
-            l1 = 1.2,
+            beta = 2.0, 
+            l1 = 0.7,
             l2 = 1.0, 
-	    bits = 2 ** 29)
-
+	    bits = 2 ** 26)
+    
     loss = 0.
     count = 0
+    val_count = 0
 
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
@@ -205,8 +227,9 @@ if __name__ == '__main__':
     names = [description[0] for description in cursor.description ]
     print names
     line = {}
-    epoch = 2
-
+    epoch = 1
+    N_holdout = 100
+    
     for name in names:
         line[name] = 0
 
@@ -218,30 +241,39 @@ if __name__ == '__main__':
         if values is None:
             print 'epoch = ', epoch    
             epoch -= 1
-            cursor.execute(query)
+            cursor.execute(query)   
+            
+            loss = 0.
+            count = 0
+            val_count = 0
+
             continue
-            #break
 
         for ind in xrange(len(names)):
             line[names[ind]] = values[ind]
 
         #print 'Debug:', line, type(line)
+        
 
         clf.fit(line)
-	pred = clf.predict()
-	loss += clf.logloss()
-	clf.update(pred)
-	count += 1
+        pred = clf.predict()
         
-        if count%1000000 == 0: 
-	    print ("(seen, loss) : ", (count, loss * 1./count))
-	
-        #if count == 100000: 
+        if count % N_holdout != 0:
+	    clf.update(pred)
+        else: 
+	    loss += clf.logloss()
+            val_count += 1
+        
+        if count % 100000 == 0 and count > 1 and val_count != 0:
+	    print ("(seen, loss) : ", (count, val_count, loss * 1. / val_count))
+        
+        count += 1
+        #if count == 100000:
             #break
 
     print 'Model training takes ', datetime.datetime.now() - start
     
-    
+    '''
     print 'Export testing results:'
     test = 'BigData5test'
     #query = 'select * from ' + test #+ ' limit 10'
@@ -256,7 +288,7 @@ if __name__ == '__main__':
         line[name] = 0
 
 
-    with open('temp/temp_3.csv', 'w') as output:
+    with open('temp/temp_4.csv', 'w') as output:
             
         while 1:
             
@@ -273,3 +305,4 @@ if __name__ == '__main__':
 	    output.write('%s\n' % str(clf.predict()))
         
     print 'Result export takes ', datetime.datetime.now() - start
+    '''
